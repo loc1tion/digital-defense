@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Цифровая защита</title>
+<style>
+:root{--bg:#0a0a2e;--panel:#15183f;--panel2:#1b1f52;--line:#2b3070;--tx:#eef1ff;--mut:#9aa3d6;--ac:#7fd8f0;--blue:#4d6bff;--vi:#5b4be0;--ok:#34d399;--bad:#fb7185;--or:#e9876a;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-size:15.5px;line-height:1.55;color:var(--tx);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;padding:20px;background:radial-gradient(900px 600px at 100% 0,#1b1a8c66,transparent 60%),radial-gradient(700px 500px at 0 100%,#3b1d9a55,transparent 60%),var(--bg)}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(124,108,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(124,108,255,.06) 1px,transparent 1px);background-size:46px 46px}
+.shell{position:relative;display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 40px);border:1px solid var(--line);border-radius:20px;overflow:clip;background:#101238ee;box-shadow:0 30px 80px #0009}
+.shell.mini{grid-template-columns:76px 1fr}
+.side{position:sticky;top:0;height:100vh;max-height:calc(100vh - 40px);padding:18px 14px 0;background:linear-gradient(180deg,#171a45,#12143a);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;overflow:hidden}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.1rem;padding:2px 6px 16px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.logo i{flex:none;width:36px;height:36px;display:grid;place-items:center}
+.logo svg{width:34px;height:34px;filter:drop-shadow(0 0 10px #7fd8f088)}
+.grp{font-size:.78rem;color:var(--mut);padding:12px 10px 4px}
+.ni{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;color:#cfd6ff;padding:11px 12px;border-radius:10px;border:1px solid transparent;font-size:.95rem}
+.ic{flex:none;width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ni .s{display:none}
+.ni:hover{color:#fff;background:#ffffff0d}
+.ni.active{color:var(--ac);background:#2b3a9a55;border-color:#4a5bd0;box-shadow:0 0 18px #4d6bff33}
+.sidestat{margin-top:10px;background:#0e1030;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.82rem;color:var(--mut)}
+.robot{width:100%;max-width:200px;margin:auto auto 0;opacity:.8;flex:none}
+.shell.mini .l,.shell.mini .grp,.shell.mini .sidestat,.shell.mini .robot{display:none}.shell.mini .ni{justify-content:center}
+.mainc{min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:14px 22px;background:#12153ccc;backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.ib{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#0d0f2e;border:1px solid var(--line);color:#cfd6ff;padding:0}
+.ib:hover{border-color:var(--ac);color:var(--ac);box-shadow:0 0 14px #7fd8f033}
+.search{flex:1;max-width:380px;display:flex;align-items:center;gap:8px;background:#0d0f2e;border:1px solid var(--line);border-radius:12px;padding:0 12px;height:40px}
+.search input{flex:1;min-width:0;background:transparent;border:0;color:var(--tx);font:inherit;font-size:.9rem;outline:none}
+.search:focus-within{border-color:var(--ac);box-shadow:0 0 0 3px #7fd8f022}
+.search kbd{font:inherit;font-size:.75rem;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+.sp1{flex:1}
+.crumb{display:none}.crumb b{display:block;font-size:1.05rem}.crumb span{color:var(--mut);font-size:.82rem}
+.chip{border:1px solid var(--line);background:#0d0f2e;color:var(--tx);border-radius:99px;padding:7px 14px;font-size:.88rem;white-space:nowrap}
+#pbtn{display:flex;align-items:center;gap:10px;background:transparent;border:0;color:var(--tx);padding:2px 6px;border-radius:12px;max-width:50vw}
+#pbtn:hover{background:#ffffff0d}
+.av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:linear-gradient(135deg,var(--vi),var(--ac));color:#071027;box-shadow:0 0 12px #7fd8f055}
+.un{text-align:left;min-width:0}.un b{display:block;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.un small{color:var(--mut);font-size:.78rem}
+.wrap{width:100%;max-width:1180px;margin:0 auto;padding:22px}
+.wrap>.card{max-width:840px;margin:0 auto}
+h1{font-size:clamp(1.7rem,5vw,2.3rem);margin:8px 0;background:linear-gradient(90deg,var(--ac),#a99bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{margin:6px 0 14px;font-size:1.3rem;line-height:1.3}h3{margin:0;font-size:1.05rem}
+.mut{color:var(--mut);font-size:.92rem}
+.card,.panel,.sc,.mode,.ach{background:radial-gradient(420px 220px at 100% 0,#2f43d655,transparent 70%),linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 28px #0006,inset 0 1px 0 #ffffff10}
+.card{padding:22px;animation:in .35s ease}.panel{padding:18px;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.shield{font-size:3rem;filter:drop-shadow(0 0 18px #7fd8f099);animation:pulse 2.5s infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;transition:.2s}
+button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:active:not(:disabled){transform:scale(.97)}
+.btn{background:linear-gradient(90deg,#3a35c8,var(--ac));color:#fff;font-weight:700;padding:12px 24px;text-shadow:0 1px 2px #0005;box-shadow:0 4px 20px #4d6bff44}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px #7fd8f055}
+.wide{width:100%}
+.ghost{background:#ffffff08;color:var(--tx);border:1px solid var(--line);padding:10px 18px}
+.ghost:hover:not(:disabled){border-color:var(--ac);color:var(--ac);background:#7fd8f012}
+.back{margin:0 0 14px;border-color:#4a5bd0;color:var(--ac);font-weight:600}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.tog{display:flex;gap:8px;flex-wrap:wrap}.tog .ghost{padding:8px 14px;font-size:.9rem}.tog .ghost.on{border-color:var(--ac);color:var(--ac);background:#7fd8f018;font-weight:700;box-shadow:0 0 14px #7fd8f033}
+.dash{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:18px;align-items:start}
+.col,.col2{display:flex;flex-direction:column;gap:18px;min-width:0}
+.sc{padding:18px 18px 0;overflow:hidden}
+.scr{display:flex;gap:14px;align-items:center}
+.si{width:50px;height:50px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,#3b4bd055,#1a1e55);border:1px solid #4a5bd0;font-size:1.4rem;flex:none}
+.scr b{display:block;font-size:1.55rem;line-height:1.2}.scr span:last-child{color:var(--mut);font-size:.88rem}
+.sp{display:block;width:calc(100% + 36px);margin:6px -18px 0;height:76px}
+.gc{padding:20px}.gc svg{display:block;margin:6px auto 0;width:100%;max-width:260px}
+.gl{text-align:center;margin:-6px 0 14px}.gl b{font-size:1.9rem;display:block}.gl span{display:inline-block;border:1px solid #1f8f66;color:var(--ok);border-radius:99px;padding:1px 12px;font-size:.8rem}
+.legend{display:flex;gap:14px;font-size:.85rem;color:var(--mut)}.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.chart{position:relative;display:flex;gap:10px;margin-top:16px}
+.yax{display:flex;flex-direction:column;justify-content:space-between;height:200px;font-size:.75rem;color:var(--mut);text-align:right;min-width:24px}
+.bars{flex:1;display:grid;grid-template-columns:repeat(10,1fr);gap:6px;min-width:0}
+.bg{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.pair{height:200px;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:3px;border-bottom:1px solid var(--line)}
+.pair i{display:block;width:42%;max-width:20px;border-radius:6px 6px 0 0;transition:height .5s}
+.b1{background:linear-gradient(180deg,#8fb4ff,#4d6bff)}.b2{background:linear-gradient(180deg,#f0a58b,var(--or))}
+.bg span{font-size:.68rem;color:var(--mut);text-align:center;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.empty{position:absolute;inset:0 0 30px 34px;display:grid;place-items:center;text-align:center;color:var(--mut);font-size:.9rem;pointer-events:none}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.mode{display:flex;flex-direction:column;gap:8px;text-align:left;color:var(--tx);padding:18px}
+.mode:hover{transform:translateY(-4px);border-color:var(--ac);box-shadow:0 0 0 1px #7fd8f055,0 12px 36px #4d6bff33}
+.mi{width:48px;height:48px;display:grid;place-items:center;font-size:1.6rem;border-radius:12px;background:linear-gradient(135deg,#5b4be044,#7fd8f033);border:1px solid #4a5bd0}
+.mode b{font-size:1.05rem}.mode em{margin-top:auto;padding-top:6px;font-style:normal;color:var(--ac);font-size:.88rem}
+.mbar,.bar{height:7px;background:#0b0d2c;border-radius:9px;overflow:hidden}.bar{margin-bottom:18px}
+.mbar i,.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--ac));box-shadow:0 0 10px #7fd8f088;transition:width .4s}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip2{width:42px;height:42px;display:grid;place-items:center;border-radius:11px;background:#0b0d2c;border:1px solid var(--line);font-size:1.2rem;opacity:.4;filter:grayscale(1)}
+.chip2.got{opacity:1;filter:none;border-color:var(--ok);box-shadow:0 0 14px #34d39944}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:var(--mut);font-size:.88rem;margin-bottom:8px}
+.topic{color:var(--ac);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase}
+.msg{background:#0a0c2a;border:1px solid var(--line);border-left:4px solid var(--ac);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.msg b{display:block;color:var(--ac);font-size:.8rem;margin-bottom:4px}
+.opt{display:block;width:100%;text-align:left;background:#0e1136;color:var(--tx);border:1px solid var(--line);padding:14px 16px;margin-bottom:10px;border-radius:12px}
+.opt:hover:not(:disabled){border-color:var(--ac);transform:translateX(4px);background:#161a50;box-shadow:0 0 16px #7fd8f022}
+.opt:disabled{opacity:1;cursor:default}.opt:disabled:not(.ok):not(.bad){opacity:.55}
+.opt.ok{border-color:var(--ok);background:#0b2c2b;box-shadow:0 0 18px #34d39933}
+.opt.bad{border-color:var(--bad);background:#35142c;box-shadow:0 0 18px #fb718533}
+.fb{border-radius:12px;padding:14px 16px;margin:6px 0 16px;animation:in .3s}
+.fb.ok{background:#0b2c2b;border:1px solid var(--ok)}.fb.bad{background:#35142c;border:1px solid var(--bad)}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.score{font-size:3.4rem;font-weight:800;margin:0;color:var(--ac);text-shadow:0 0 24px #7fd8f077}
+.rec{background:#0e1136;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0;font-size:.85rem;color:var(--mut)}
+.sg div{background:#0e1136;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}.sg b{display:block;font-size:1.5rem;color:var(--ac)}
+.achs{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.ach{display:flex;flex-direction:column;gap:5px;padding:16px;opacity:.55;filter:grayscale(.8)}
+.ach.got{opacity:1;filter:none;border-color:var(--ok);box-shadow:0 0 22px #34d39922}
+.ach em{font-style:normal;font-size:.85rem;margin-top:4px;color:var(--mut)}.ach.got em{color:var(--ok)}
+.inp{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:#0a0c2a;color:var(--tx);font:inherit;margin:8px 0}
+.inp:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px #7fd8f022}
+ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
+#toasts{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:30;pointer-events:none}
+.toast{background:#0b2c2b;border:1px solid var(--ok);padding:10px 16px;border-radius:12px;animation:in .3s;box-shadow:0 0 20px #34d39944}
+@media(max-width:1000px){.dash{grid-template-columns:1fr}.col2{order:-1}.col{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.col .gc{grid-column:1/-1}}
+@media(max-width:860px){
+body{padding:0}
+.shell{display:block;border:0;border-radius:0;min-height:100vh}
+.side{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;max-height:none;flex-direction:row;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));border-right:0;border-top:1px solid var(--line);z-index:15;background:#0d1030f7}
+.logo,.sidestat,.robot,.grp,#hb,.search kbd{display:none}
+.ni{flex-direction:column;gap:2px;padding:6px 2px;font-size:.66rem;text-align:center;flex:1;min-width:0;justify-content:center}
+.ni .l{display:none}.ni .s{display:inline}
+.ni.active{box-shadow:inset 0 2px 0 var(--ac),0 0 14px #7fd8f022}
+.topbar{padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px}
+.search{display:none}.crumb{display:block}.un small{display:none}
+.wrap{padding:16px 14px 96px}.card{padding:18px}.nav{flex-direction:column-reverse}.nav button{width:100%}
+#toasts{bottom:84px}.bars{gap:3px}.bg span{font-size:.6rem}
+}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+#storageNotice{position:fixed;top:8px;left:50%;transform:translateX(-50%);width:min(94%,720px);max-height:35vh;overflow:auto;z-index:50;background:#35142c;border:2px solid var(--bad);padding:12px 16px;border-radius:12px;box-shadow:0 6px 24px #0009}
+#storageNotice button{margin-top:8px}
+.intro{margin-bottom:18px;padding:22px}.intro p{max-width:70ch}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.card h2,.rec,.msg,.mode,.intro,.un b{overflow-wrap:anywhere}
+.card:focus-visible,h1:focus-visible,h2:focus-visible,.fb:focus-visible{outline:2px solid var(--ac);outline-offset:4px}
+a{color:var(--ac)}.sources{margin-top:22px}.sources li{margin:8px 0}
+.ni .s{overflow-wrap:anywhere}.ni.active{font-weight:700}
+.mode{min-width:0}.modes,.achs{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.yax{flex-shrink:0}.legend{flex-wrap:wrap}.sg{grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr))}
+.un{max-width:160px}.opt[aria-disabled="true"]{cursor:default}.opt[aria-disabled="true"]:not(.ok):not(.bad){opacity:.6}
+@media(max-width:860px){.side{min-height:76px}.wrap{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}.ni{font-size:.62rem}.topbar{gap:6px;flex-wrap:wrap}.un{max-width:105px}.chip{padding:5px 8px;font-size:.76rem}.crumb{flex:1;min-width:90px}.crumb b{font-size:.88rem}.crumb span{font-size:.7rem}.sp1{display:none}.topbar #bell{display:none}#pbtn{max-width:42%}.intro{padding:18px}.chart{gap:5px}.bg span{writing-mode:vertical-rl;max-height:90px;overflow:visible}.pair,.yax{height:160px}.shell.mini .ni{justify-content:center}.shell.mini .ni .s{display:inline}.col{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+</style>
+</head>
+<body>
+<div class="shell" id="shell">
+<aside class="side"><div class="logo"><i><svg viewBox="0 0 24 24"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fd8f0"/><stop offset="1" stop-color="#5b4be0"/></linearGradient></defs><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z" fill="#1a1e55" stroke="url(#lg)" stroke-width="1.8"/><path d="M9 12l2 2 4-4" fill="none" stroke="#7fd8f0" stroke-width="1.8" stroke-linecap="round"/></svg></i><span class="l">Цифровая защита</span></div>
+<nav id="nav" style="display:contents"><div class="grp">Меню</div><button class="ni" data-k="home"><svg class="ic" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10"/></svg><span class="l">Главная</span><span class="s">Главная</span></button><button class="ni" data-k="catch"><svg class="ic" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg><span class="l">Поймай мошенника</span><span class="s">Мошенник</span></button><button class="ni" data-k="right"><svg class="ic" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"/></svg><span class="l">Защита аккаунтов</span><span class="s">Аккаунты</span></button><button class="ni" data-k="safe"><svg class="ic" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg><span class="l">Безопасные действия</span><span class="s">Действия</span></button><div class="grp">Аккаунт</div><button class="ni" data-k="ach"><svg class="ic" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg><span class="l">Достижения</span><span class="s">Награды</span></button><button class="ni" data-k="profile"><svg class="ic" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg><span class="l">Профиль</span><span class="s">Профиль</span></button></nav>
+<div class="sidestat" id="sst"></div>
+<svg class="robot" viewBox="0 0 200 200"><defs><linearGradient id="rg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c63ff"/><stop offset="1" stop-color="#1a1c4a" stop-opacity="0"/></linearGradient></defs><path d="M60 60a40 40 0 0 1 80 0v30a40 40 0 0 1-80 0z" fill="url(#rg)" stroke="#7fd8f0" stroke-opacity=".5"/><rect x="72" y="62" width="56" height="22" rx="10" fill="#0b0d2e" stroke="#7fd8f0" stroke-opacity=".6"/><circle cx="88" cy="73" r="4" fill="#7fd8f0"/><circle cx="112" cy="73" r="4" fill="#7fd8f0"/><path d="M30 200c0-40 30-60 70-60s70 20 70 60z" fill="url(#rg)" stroke="#7c6cff" stroke-opacity=".5"/><circle cx="100" cy="165" r="10" fill="none" stroke="#7fd8f0" stroke-opacity=".7"/></svg></aside>
+<div class="mainc"><header class="topbar"><button class="ib" id="hb" aria-label="Свернуть меню"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h16"/></svg></button>
+<div class="crumb" id="crumb"></div>
+<label class="search"><svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px;color:var(--mut)"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input aria-label="Найти раздел" id="q" placeholder="Найти раздел…" autocomplete="off"><kbd>Enter</kbd></label>
+<span class="sp1"></span><span class="chip" id="sk"></span>
+<button class="ib" id="bell" aria-label="Достижения"><svg class="ic" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+<button id="pbtn" aria-label="Профиль"></button></header>
+<main class="wrap" id="app" tabindex="-1"></main></div></div><div id="storageNotice" role="status" aria-live="polite" hidden></div><div id="announce" class="sr" role="status" aria-live="polite" aria-atomic="true"></div><div id="toasts" role="status" aria-live="polite"></div><noscript>Для обучения включите JavaScript в браузере.</noscript>
+<script>
+/* ===== ДАННЫЕ: 30 заданий =====
+ [тема, тип сообщения, отправитель, текст сообщения, вопрос, [варианты], индекс верного, объяснение] */
+const TOPICS={
+ msg:"Мошеннические сообщения",ph:"Фишинг и уведомления",lnk:"Подозрительные ссылки",sig:"Признаки обмана",act:"Безопасные действия",
+ pw:"Надёжность паролей",dat:"Защита личных данных",acc:"Безопасность аккаунтов",hak:"Действия при взломе",soc:"Социальные сети"};
+const REC={
+ msg:"Не называйте коды из SMS и не переводите деньги по сообщению. Проверяйте просьбы по другому каналу.",
+ ph:"Смотрите на адрес отправителя, вложения и давление срочностью. Настоящие сервисы не требуют вводить данные по ссылке.",
+ lnk:"Проверьте имя сайта между https:// и следующим /, ? или #. Сравните его с известным адресом сервиса; остерегайтесь опечаток и коротких ссылок.",
+ sig:"Подозрительны гарантии дохода, предоплата за «выигрыш» или кредит и просьбы прислать документы.",
+ act:"В сомнительной ситуации прервите разговор и сами свяжитесь с организацией по официальным контактам.",
+ pw:"Выбирайте длинные уникальные пароли или фразы без личных данных и используйте менеджер паролей.",
+ dat:"Не делитесь документами и ответами на секретные вопросы без необходимости, скрывайте штрихкоды и номера.",
+ acc:"Включите двухфакторную защиту, не сообщайте коды и давайте приложениям минимум разрешений.",
+ hak:"При взломе меняйте пароль с надёжного устройства, завершайте сеансы и блокируйте карты и SIM.",
+ soc:"Закрывайте профиль, не публикуйте геометки в реальном времени и не общайтесь с подозрительными незнакомцами."};
+const ALL=[
+["msg","SMS","БанкОнлайн","Ваша карта заблокирована. Срочно позвоните по номеру 8-800-000-00-00 и назовите оператору код из SMS.","Как поступить?",["Позвонить и назвать код, чтобы разблокировать карту","Позвонить в банк по номеру с обратной стороны карты","Переслать сообщение друзьям с просьбой проверить"],1,"Признаки обмана: срочность, чужой номер и просьба назвать код. Банк никогда не просит коды из SMS. Номер надо брать с карты или из официального приложения."],
+["msg","Мессенджер","Неизвестный номер","Мама, я потерял телефон, это мой новый номер. Срочно переведи 15 000 ₽ на карту, потом всё объясню!","Что сделать в первую очередь?",["Перевести деньги, ведь ребёнок в беде","Позвонить родному человеку на старый номер или задать вопрос, ответ на который знает только он","Ответить и попросить прислать данные карты"],1,"Признаки: новый номер, срочность и просьба о деньгах. Личность проверяют по другому каналу связи."],
+["msg","SMS","ЭкспрессДоставка","Посылка не доставлена. Подтвердите адрес и оплатите 49 ₽ за повторную доставку: dostavka-express.test/pay","Что лучше сделать?",["Перейти по ссылке и оплатить, это же всего 49 ₽","Проверить посылку в приложении или на сайте службы, набрав адрес вручную","Ответить на SMS и уточнить детали"],1,"Мелкая сумма нужна, чтобы получить данные карты. Ссылка из SMS ведёт на сторонний домен, а статус посылки проверяют в официальном приложении."],
+["ph","Email","support@mail-secure-id.test","Тема: Ваш пароль истекает через 1 час! Перейдите по ссылке и подтвердите данные, иначе почта будет удалена.","Какой признак сильнее всего выдаёт фишинг?",["В письме есть логотип","Сторонний домен отправителя и давление срочностью","Письмо пришло днём"],1,"Логотип легко скопировать. Выдают письмо чужой домен, угроза удаления и требование срочно ввести данные."],
+["ph","Уведомление","Выберите настоящее","Какое из трёх уведомлений выглядит настоящим?","Какое сообщение безопасно?",["«Войдите по ссылке за 10 минут, иначе аккаунт удалят»","«Выполнен вход с нового устройства. Если это были не вы, откройте приложение и завершите сеансы»","«Вы выиграли приз! Введите данные карты для получения»"],1,"Настоящее уведомление информирует и предлагает зайти в приложение самостоятельно. Фишинг пугает, торопит или обещает выигрыш и просит данные."],
+["ph","Email","buh@firma-opt.test","Здравствуйте! Во вложении счёт на оплату: Счёт_4471.pdf.exe","Что делать с вложением?",["Открыть, чтобы узнать, что за счёт","Не открывать, удалить письмо и сообщить об угрозе","Открыть на телефоне, там безопаснее"],1,"Двойное расширение .pdf.exe означает, что это программа, замаскированная под документ. Такие вложения не открывают."],
+["lnk","Выбор ссылки","Настоящий домен банка: ecobank.example","Нужно войти в интернет-банк ЭкоБанк.","Какая ссылка настоящая?",["https://ecobank.secure-login.example/","https://ecobank.example/login","https://ecobank-verify.test/login"],1,"Совпадает только ecobank.example. В остальных ссылках настоящий домен другой: secure-login.example и ecobank-verify.test."],
+["lnk","SMS","+7 900 000-00-00","Вы выиграли сертификат на 5 000 ₽! Забирайте: bit.example/x7Kq","Как безопасно поступить с короткой ссылкой?",["Перейти быстро, пока акция не закончилась","Не переходить: короткая ссылка скрывает реальный адрес, а выигрыш в неизвестной акции похож на обман","Перейти, но ничего не вводить"],1,"Признаки: неожиданный выигрыш, неизвестный отправитель и скрытый адрес. Даже один переход может запустить загрузку вредоносного кода."],
+["lnk","Ссылка","https://login.lightpay.example.account-check.test/verify","Вам пришла ссылка «от сервиса ЛайтПэй».","Какой сайт реально откроется?",["lightpay.example","login.lightpay.example","account-check.test"],2,"В этой ссылке имя сайта — login.lightpay.example.account-check.test, а основной домен — account-check.test. Слова lightpay.example здесь лишь поддомены. Не ищите домен по первому слешу в https://; у реальных адресов бывают зоны вроде co.uk."],
+["sig","Объявление","ИнвестКлуб","Вложите 10 000 ₽ и получайте 5% в день! Доход гарантирован, места ограничены.","Что здесь главный признак обмана?",["Объявление написано в мессенджере","Нереальная доходность с гарантией и нехватка времени","В тексте есть цифры"],1,"Честные инвестиции не гарантируют высокий доход. Нереальные проценты и давление «места ограничены» типичны для пирамид."],
+["sig","SMS","КредитЭкспресс","Вам одобрен кредит 500 000 ₽ без проверок! Оплатите страховку 3 000 ₽ перед получением.","Как лучше поступить?",["Оплатить страховку, это небольшая сумма","Не платить и проверить организацию по официальному реестру","Прислать фото паспорта для ускорения"],1,"Признаки: предоплата за выдачу и «без проверок». Настоящие кредиторы вычитают комиссии из суммы и не требуют перевода вперёд."],
+["sig","Мессенджер","HR Работа Онлайн","Удалённая работа, 5 000 ₽ в день за лайки видео. Для оформления пришлите фото паспорта.","Что насторожить должно в первую очередь?",["Работа выглядит слишком простой и дорогой, а паспорт просят заранее","Обращение на «вы»","Работа удалённая"],0,"Высокая оплата за простое действие и запрос паспорта до договора ведут к краже данных или вовлечению в схему."],
+["act","Звонок","«Служба безопасности банка»","С вашего счёта идёт подозрительный перевод. Переведите деньги на безопасный счёт, пока не поздно.","Что делать?",["Выполнить инструкции, ведь это защита денег","Прервать звонок и самому позвонить в банк по официальному номеру","Продиктовать данные карты, чтобы они проверили"],1,"Не существует «безопасных счетов». Давление и просьба перевести деньги выдают мошенников. Звонок завершают и перезванивают сами."],
+["act","Ситуация","Находка","Вы нашли флешку у подъезда с надписью «Фото».","Как безопасно поступить?",["Вставить в личный компьютер и посмотреть","Не подключать: выбросить или отдать специалисту по безопасности","Подключить к старому ноутбуку без интернета"],1,"Найденные накопители могут содержать вредоносные программы, которые запускаются при подключении. Лучше не подключать их вовсе."],
+["act","Ситуация","Кафе","В кафе открытая сеть Wi-Fi без пароля. Вам срочно нужно проверить баланс банка.","Что безопаснее?",["Подключиться и войти в банковское приложение","Использовать мобильный интернет, а не открытую сеть","Подключиться и быстро ввести пароль"],1,"HTTPS и защищённые приложения шифруют содержимое соединения даже в публичной сети. Но сеть может оказаться поддельной: не игнорируйте предупреждения о сертификате и не устанавливайте предложенные сетью программы. Если сомневаетесь, используйте мобильный интернет. HTTPS не гарантирует честность самого сайта."],
+["pw","Пароль","Вымышленный пример","qwerty123 · Пароль1! · Маяк-Тюльпан-Река-47-Зима","Какой пароль самый надёжный?",["qwerty123","Пароль1!","Маяк-Тюльпан-Река-47-Зима"],2,"Длинная фраза из случайных слов, цифр и дефисов трудна для подбора. Первые два варианта очень распространённые шаблоны."],
+["pw","Пароль","Вымышленный пример","Anna2008","Почему этот пароль слабый?",["Он содержит заглавную букву","Он состоит из имени и года рождения, то есть предсказуем","Он слишком длинный"],1,"Имена и даты рождения подбираются в первую очередь. Хороший пароль не содержит личных данных."],
+["pw","Ситуация","Вымышленный пример","Алексей использует пароль Zx9#kLm2!pQ на всех десяти сайтах, ведь он сложный.","Насколько это безопасно?",["Безопасно, пароль достаточно сложный","Небезопасно: утечка с одного сайта откроет все остальные аккаунты","Безопасно, если менять его раз в год"],1,"Главное правило: уникальный пароль для каждого сервиса. Даже сложный пароль теряет смысл, если он повторяется."],
+["pw","Ситуация","Вопрос","У вас больше 30 аккаунтов, и запомнить уникальные пароли невозможно.","Какой способ хранения лучше?",["Заметка в телефоне без защиты","Менеджер паролей с одним сильным мастер-паролем","Использовать один пароль, чтобы не забыть"],1,"Менеджер паролей шифрует хранилище и позволяет иметь уникальный пароль для каждого сайта. Открытые заметки и один пароль небезопасны."],
+["dat","Соцсеть","Тест «Узнай свой герб»","Введите девичью фамилию мамы, кличку первого питомца и улицу детства, и мы покажем ваш герб!","Чем опасен такой тест?",["Ничем, это просто развлечение","Эти ответы часто используются как секретные вопросы для восстановления доступа","Он требует много времени"],1,"Подобные тесты собирают ответы на секретные вопросы. Мошенникам они помогают взломать аккаунт."],
+["dat","Ситуация","Фото","Вы летите в отпуск и хотите выложить фото посадочного талона.","Как сделать безопаснее?",["Выложить целиком, там нет ничего секретного","Закрыть штрихкод, номер брони и фамилию","Выложить, но через час удалить"],1,"По штрихкоду и номеру брони можно получить доступ к данным рейса и изменить бронирование."],
+["dat","Магазин","ТехноДом","Для скидки 5% онлайн-магазин просит указать серию и номер паспорта.","Как поступить?",["Указать, ведь скидка выгодна","Отказаться: для покупки паспорт не нужен","Отправить фото паспорта, если очень нужна скидка"],1,"Принцип минимума данных: сервис не должен просить то, что ему не нужно для услуги. Паспортные данные можно использовать для мошенничества."],
+["acc","Вопрос","Защита почты","Почта связана со всеми вашими аккаунтами.","Как лучше всего её усилить?",["Включить двухфакторную защиту через приложение-аутентификатор","Сменить аватар","Выйти из почты на всех устройствах и больше не заходить"],0,"Двухфакторная аутентификация требует второй подтверждающий шаг. Приложение-аутентификатор надёжнее SMS, потому что SIM можно перехватить."],
+["acc","SMS","Код входа","Код подтверждения 482913. Никому его не сообщайте. Но вы никуда не входили.","Что это значит?",["Ошибка системы, ничего не делать","Не сообщать код и проверить активность аккаунта через официальный сервис","Нужно вернуть код отправителю"],1,"Неожиданный код может быть связан с попыткой входа или восстановления доступа, а также ошибкой в номере. Он не доказывает утечку пароля. Не сообщайте код, откройте официальный сервис самостоятельно и проверьте активность; при подозрительных входах смените пароль и завершите чужие сеансы."],
+["acc","Приложение","Фонарик Про","Простое приложение-фонарик просит доступ к контактам, SMS и микрофону.","Какое решение верное?",["Разрешить всё, иначе не заработает","Отказать в разрешениях или удалить приложение","Разрешить всё, но только на сегодня"],1,"Фонарику не нужны контакты и SMS. Запрос лишних разрешений признак шпионского или вредоносного приложения."],
+["hak","Ситуация","Взлом","Ваш аккаунт в соцсети рассылает друзьям ссылки со спамом.","Что сделать в первую очередь?",["Удалить сообщения и забыть","Сменить пароль с надёжного устройства, завершить все сеансы и предупредить друзей","Создать новый аккаунт и бросить старый"],1,"Нужно прекратить доступ злоумышленнику (смена пароля и завершение сеансов), а затем предупредить контакты, чтобы они не перешли по ссылкам."],
+["hak","Ситуация","Потеря телефона","Вы потеряли телефон с банковским приложением и почтой.","Что делать сначала?",["Ждать пару дней: вдруг найдётся","Купить такой же телефон","Заблокировать SIM и карту, сменить пароли с другого устройства и включить удалённое стирание"],2,"Чем быстрее закрыть доступ, тем меньше риск потерять деньги и данные. Ждать нельзя."],
+["soc","Соцсеть","Новый подписчик","Профиль без фото, создан три недели назад. Пишет: «Привет! Давай перейдём в приват, у меня выгодное предложение».","Как поступить?",["Продолжить общение, вдруг интересно","Не отвечать, заблокировать и пожаловаться","Прислать свой номер телефона"],1,"Признаки: пустой новый профиль, быстрый перевод в личную переписку и «выгодное предложение»."],
+["soc","Публикация","Геометка","«Мы улетели на две недели!» с геометкой и фото квартиры.","Что в этой публикации рискованно?",["Указано, что дома никого нет, и показано, где вы живёте","Слишком много эмодзи","Фото сделано днём"],0,"Публичное сообщение об отъезде и домашний адрес помогают злоумышленникам. Фото из поездки лучше выкладывать после возвращения."],
+["soc","Профиль","Настройки","Ваш профиль открыт для всех, в нём указаны номер телефона и дата рождения.","Что лучше сделать?",["Оставить как есть","Закрыть профиль, ограничить видимость и скрыть телефон и дату рождения","Удалить всё и больше не пользоваться интернетом"],1,"Личные данные в открытом доступе помогают в социальной инженерии. Достаточно настроить приватность и показывать данные только друзьям."]
+];
+
+/* ===== СОСТОЯНИЕ ===== */
+const app=document.getElementById("app");
+ALL.push(
+["msg","SMS","ЭкоБанк","ЭкоБанк: оплата 1 250 ₽ в магазине «Лавка». Если операция не ваша, позвоните по номеру на обратной стороне карты.","Есть ли в этом учебном сообщении явные признаки мошенничества?",["Да, мошенническое","Явных признаков обмана нет; при сомнении проверю"],1,"В учебном примере нет явных признаков обмана: сообщение предлагает проверить операцию по номеру с карты. Это безопасный способ проверки, но один только текст и имя отправителя не доказывают подлинность SMS."],
+["msg","Email","info@technodom.example","Здравствуйте! Ваш заказ №2281 отправлен. Отследить посылку можно в личном кабинете на сайте магазина. С уважением, ТехноДом.","Есть ли в этом учебном сообщении явные признаки мошенничества?",["Да, мошенническое","Явных признаков обмана нет; при сомнении проверю"],1,"В учебном примере нет явных признаков обмана. Однако адрес отправителя можно подделать: проверьте заказ, самостоятельно открыв официальный сайт или приложение магазина."],
+["msg","Мессенджер","Сергей из соседнего отдела","Привет! Купи мне 3 подарочные карты по 5 000 ₽, потом верну. Только быстрее и никому не говори.","Есть ли в этом учебном сообщении явные признаки мошенничества?",["Да, мошенническое","Явных признаков обмана нет; при сомнении проверю"],0,"Признаки обмана: просьба о подарочных картах, срочность и «никому не говори». Вероятнее всего, аккаунт знакомого взломан. Свяжитесь с ним по другому каналу."],
+["msg","SMS","Госсервис-Помощь","Вам положена выплата 12 000 ₽. Оформите по ссылке gosservis-vyplata.test в течение 30 минут.","Есть ли в этом учебном сообщении явные признаки мошенничества?",["Да, мошенническое","Явных признаков обмана нет; при сомнении проверю"],0,"Признаки обмана: неожиданная выплата, ограничение по времени и сторонняя ссылка. Госуслуги не просят оформлять выплаты через случайные сайты."],
+["msg","Email","Городская библиотека","Напоминаем, что срок возврата книги «Основы алгоритмов» истекает 28 октября. Продлить можно в личном кабинете или на стойке.","Есть ли в этом учебном сообщении явные признаки мошенничества?",["Да, мошенническое","Явных признаков обмана нет; при сомнении проверю"],1,"В учебном примере нет явных признаков обмана: предлагаются самостоятельный вход в кабинет или личный визит. Конкретные сведения не доказывают подлинность отправителя; при сомнении проверьте через официальный канал."],
+["msg","Мессенджер","Поддержка соцсети","Ваш аккаунт нарушил правила. Для разблокировки введите логин, пароль и код из SMS: support-login.test","Есть ли в этом учебном сообщении явные признаки мошенничества?",["Да, мошенническое","Явных признаков обмана нет; при сомнении проверю"],0,"Признаки обмана: угроза блокировки, просьба ввести пароль и код на стороннем сайте. Настоящая поддержка никогда не запрашивает пароль и коды."]
+);
+const MODES={
+ catch:{name:"Поймай мошенника",icon:"🕵️",desc:"Определите, мошенническое сообщение или настоящее, и найдите признаки обмана.",ids:[30,0,1,31,2,3,32,4,5,33,7,9,34,10,11,35]},
+ right:{name:"Защита аккаунтов",icon:"🔑",desc:"Пароли, двухфакторная защита и другие способы защитить аккаунт.",ids:[15,16,17,18,22,23,24,25]},
+ safe:{name:"Безопасные действия",icon:"🚨",desc:"Подозрительные ссылки и звонки, личные данные и безопасность аккаунтов.",ids:[6,8,12,13,14,19,20,21,26,27,28,29]}};
+const THEORY={
+catch:[
+{i:"📩",t:"Как выглядит мошенническое сообщение",p:"Мошенники хотят, чтобы вы действовали быстро и не успели подумать.",l:["Срочность: «сделайте за 10 минут»","Страх или радость: блокировка, штраф, выигрыш","Просьба назвать код, пароль или данные карты","Неизвестный отправитель или странный номер"],x:["SMS: «Карта заблокирована, позвоните и назовите код из SMS».","Не звонить по номеру из сообщения, а набрать банк по номеру с обратной стороны карты. Код из SMS не называют никому."],k:["Спешка и страх — главный признак обмана","Код из SMS нельзя называть никому, даже «сотруднику банка»"]},
+{i:"🎣",t:"Фишинг: поддельные письма и сайты",p:"Фишинг заставляет вас ввести данные на поддельной странице.",l:["Проверьте полный адрес отправителя, но не считайте его доказательством подлинности","Не открывайте вложения вроде .exe или .pdf.exe","Настоящие сервисы не просят пароль в письме","Сомневаетесь — зайдите на сайт сами, набрав адрес вручную"],x:["Письмо «Пароль истекает через час» с адреса mail-secure-id.test.","Домен чужой, а давление срочностью — приём мошенников. Удалите письмо и зайдите в аккаунт через приложение или свою закладку."],k:["Логотип, имя и адрес отправителя могут быть подделаны","Не вводите данные по ссылке из письма"]},
+{i:"🔗",t:"Подозрительные ссылки и признаки обмана",p:"Ссылка может выглядеть почти как настоящая, но вести на чужой сайт.",l:["Сначала выделите имя сайта после https:// до /, ? или #. Затем сравните его с известным адресом сервиса","Следите за опечатками: 1ightpay вместо lightpay","Короткие ссылки скрывают адрес: не переходите по ним из неизвестных сообщений","Гарантированный доход, выигрыш или предоплата за кредит — признаки обмана"],x:["Ссылка login.lightpay.example.account-check.test.","Настоящий домен здесь account-check.test, а lightpay — только поддомен. Не переходите, откройте сервис через официальное приложение."],k:["Смотрите на домен, а не на красивые слова в начале","Если обещают выгоду, но просят заплатить вперёд, это обман"]}],
+right:[
+{i:"🔑",t:"Какой пароль надёжный",p:"Лучше всего пароль длинный и не связан с вами.",l:["Длина важнее сложности: от 12 символов","Подойдёт фраза из случайных слов: Маяк-Тюльпан-Река-47","Не используйте имя, дату рождения и шаблоны вроде qwerty123","Один пароль — один сайт"],x:["Пароль Anna2008 состоит из имени и года рождения.","Такие пароли подбирают в первую очередь. Придумайте длинную фразу из случайных слов."],k:["Длинная и случайная фраза лучше короткого «сложного» пароля","Личные данные в пароле использовать нельзя"]},
+{i:"🗄️",t:"Уникальные пароли и менеджер паролей",p:"Запоминать десятки паролей не нужно: их хранит менеджер.",l:["Менеджер паролей хранит всё под одним сильным мастер-паролем","Не храните пароли в открытых заметках","После утечки смените пароль везде, где он использовался","Никому не сообщайте свои пароли"],x:["Один и тот же пароль на десяти сайтах.","Утечка на одном сайте открывает все остальные аккаунты. Заведите уникальные пароли и храните их в менеджере."],k:["Повторяющийся пароль — слабое место всех аккаунтов","Менеджер паролей решает проблему запоминания"]},
+{i:"🛡️",t:"Двухфакторная защита и аккаунты",p:"Второй шаг входа защищает, даже если пароль украден.",l:["Включайте двухфакторную защиту в первую очередь для почты","Приложение-аутентификатор надёжнее SMS","Код подтверждения нельзя сообщать никому","Давайте приложениям только нужные разрешения"],x:["Пришёл код входа, хотя вы никуда не входили.","Сам код не доказывает утечку пароля: возможны попытка входа, восстановление доступа или ошибка в номере. Не сообщайте код. Самостоятельно откройте сервис, проверьте активность и включите двухфакторную защиту; при подозрительных входах смените пароль и завершите чужие сеансы."],k:["Второй фактор не даст войти по одному украденному паролю","Фонарику не нужны ваши контакты и SMS"]}],
+safe:[
+{i:"🌐",t:"Безопасное поведение в интернете",p:"Многие угрозы появляются из-за неосторожных привычек.",l:["Не подключайте найденные флешки","Если сомневаетесь в публичной Wi-Fi сети, для банка используйте мобильный интернет. Не игнорируйте предупреждения о сертификатах","Устанавливайте приложения только из официальных магазинов","Не переходите по ссылкам из подозрительных сообщений"],x:["У подъезда лежит флешка с надписью «Фото».","На ней может быть вредоносная программа. Не подключайте её, отдайте специалисту или выбросьте."],k:["Неизвестные устройства и сети могут быть опасны","HTTPS шифрует соединение, но не гарантирует честность сайта. Проверяйте адрес и не игнорируйте предупреждения браузера"]},
+{i:"🪪",t:"Защита личных данных",p:"Данные, которые вы публикуете или отправляете, могут использовать против вас.",l:["Не отправляйте фото паспорта без настоящей необходимости","Закрывайте штрихкод и номер брони на фото билетов","Остерегайтесь тестов с секретными вопросами","Скрывайте телефон и дату рождения в профиле","Не сообщайте публично, что вас нет дома"],x:["Тест «Узнай свой герб» просит кличку питомца и девичью фамилию мамы.","Это ответы на секретные вопросы для восстановления доступа. Не участвуйте в таких тестах."],k:["Сервису нужно только то, что требуется для услуги","Лишние данные в открытом доступе помогают мошенникам"]},
+{i:"📞",t:"Звонки, взлом и потеря телефона",p:"В опасной ситуации главное — не торопиться и действовать по плану.",l:["Звонит «служба безопасности»: положите трубку и сами позвоните в банк","«Безопасных счетов» не существует","При взломе смените пароль с надёжного устройства, завершите все сеансы и предупредите друзей","Потеряли телефон: блокируйте SIM и карту и меняйте пароли"],x:["Незнакомец по телефону просит перевести деньги на «безопасный счёт».","Это мошенники. Завершите разговор и позвоните в банк по официальному номеру."],k:["Перезванивайте сами по официальному номеру","Чем быстрее вы закроете доступ, тем меньше ущерб"]}]};
+// Версия 2: один профиль, изолированные гостевые попытки, маршруты без сервера.
+const KEY="cd_profile_v1",BACKUP_KEY="cd_profile_before_v2";
+const WARN="Прогресс хранится только в этом браузере на этом устройстве. Очистка данных браузера может удалить его. При открытии копии HTML по другому пути браузер может использовать отдельное хранилище.";
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const obj=x=>x!==null&&typeof x==='object'&&!Array.isArray(x),num=x=>Number.isSafeInteger(x)&&x>=0?x:0;
+const MODKEYS=Object.keys(MODES),IDS=[...new Set(MODKEYS.flatMap(k=>MODES[k].ids))],TOTAL=IDS.length;
+const SHORT={msg:"Сообщения",ph:"Фишинг",lnk:"Ссылки",sig:"Обман",act:"Действия",pw:"Пароли",dat:"Данные",acc:"Аккаунты",hak:"Взлом",soc:"Соцсети"};
+let P=null,track=false,guestStreak=0,guestAttempt=null,reviewAttempt=null,storageOK=true,storageIssue='',legacyRaw=null,repairNeeded=false;
+function newP(n){return{version:2,nick:n,total:0,correct:0,wrong:0,currentStreak:0,bestStreak:0,modes:{},ach:{},miss:{},seen:[],doneModes:{},clean:false,lessons:{},theoryDone:{},after:{},hist:[],topics:{},attempt:null}}
+function validAttempt(a){
+  if(!obj(a)||!MODES[a.mode]||!Array.isArray(a.ids)||!a.ids.length||!Array.isArray(a.answers)||!Array.isArray(a.order))return null;
+  if(a.ids.length!==a.answers.length||a.ids.length!==a.order.length||new Set(a.ids).size!==a.ids.length||a.ids.some(i=>!IDS.includes(i)))return null;
+  if(!a.review&&(a.ids.length!==MODES[a.mode].ids.length||a.ids.some((v,i)=>v!==MODES[a.mode].ids[i])))return null;
+  for(let j=0;j<a.ids.length;j++){
+    const n=ALL[a.ids[j]][5].length,v=a.answers[j],o=a.order[j];
+    if(v!==null&&(!Number.isInteger(v)||v<0||v>=n))return null;
+    if(!Array.isArray(o)||o.length!==n||new Set(o).size!==n||o.some(i=>!Number.isInteger(i)||i<0||i>=n))return null;
+  }
+  const first=a.answers.indexOf(null);
+  if(first>=0&&a.answers.slice(first).some(v=>v!==null))return null;
+  return{token:typeof a.token==='string'?a.token:'restored',mode:a.mode,ids:a.ids.slice(),answers:a.answers.slice(),order:a.order.map(x=>x.slice()),cur:Math.min(num(a.cur),first<0?a.ids.length-1:first),done:a.done===true&&first<0,review:a.review===true};
+}
+function normalize(r){
+  if(!obj(r)||typeof r.nick!=='string'||!r.nick.trim())return null;
+  const p=newP(r.nick.trim().slice(0,16));
+  for(const k of ['correct','wrong','bestStreak'])p[k]=num(r[k]);
+  p.total=p.correct+p.wrong;p.clean=r.clean===true;
+  p.hist=Array.isArray(r.hist)?r.hist.filter(v=>v===0||v===1).slice(-40):[];
+  let tail=0;for(let i=p.hist.length-1;i>=0&&p.hist[i]===1;i--)tail++;
+  p.currentStreak=Object.hasOwn(r,'currentStreak')?Math.min(num(r.currentStreak),p.correct):tail;
+  p.bestStreak=Math.max(p.bestStreak,p.currentStreak);
+  p.seen=Array.isArray(r.seen)?[...new Set(r.seen.filter(i=>IDS.includes(i)))]:[];
+  for(const k of Object.keys(TOPICS))if(obj(r.topics)&&Array.isArray(r.topics[k]))p.topics[k]=[num(r.topics[k][0]),num(r.topics[k][1])];
+  for(const id of IDS)if(obj(r.miss)&&num(r.miss[id]))p.miss[id]=num(r.miss[id]);
+  for(const k of MODKEYS){
+    const m=obj(r.modes)?r.modes[k]:null;
+    if(obj(m)){const n=MODES[k].ids.length;p.modes[k]={runs:num(m.runs),best:Math.min(num(m.best),n),last:Math.min(num(m.last),n),size:n}}
+    if(obj(r.doneModes)&&r.doneModes[k]===true)p.doneModes[k]=true;
+    const l=obj(r.lessons)&&Array.isArray(r.lessons[k])?r.lessons[k]:[];
+    p.lessons[k]=[...new Set(l.filter(i=>Number.isInteger(i)&&i>=0&&i<THEORY[k].length))];
+    if(p.lessons[k].length===THEORY[k].length||(obj(r.theoryDone)&&r.theoryDone[k]===true))p.theoryDone[k]=true;
+    p.after[k]=obj(r.after)?num(r.after[k]):0;
+  }
+  if(obj(r.ach))for(const a of ACH)if(a.id!=='all'&&r.ach[a.id]===true)p.ach[a.id]=true;
+  // Старое достижение за 30 вопросов сохраняется отдельно, новое требует все задания.
+  if(r.version!==2&&obj(r.ach)&&r.ach.all===true)p.ach.legacy30=true;
+  if(obj(r.ach)&&r.ach.legacy30===true)p.ach.legacy30=true;
+  if(IDS.every(i=>p.seen.includes(i)))p.ach.all=true;
+  p.attempt=validAttempt(r.attempt);if(p.attempt&&p.attempt.review)p.attempt=null;
+  return p;
+}
+function storageNotice(message){
+  storageIssue=message;const el=$('storageNotice');el.hidden=!message;
+  el.innerHTML=message?`<div>${esc(message)}</div><button class="ghost" id="retrySave">Повторить сохранение</button> <button class="ghost" id="hideStorage">Закрыть уведомление</button>`:'';
+  if(message){$('retrySave').onclick=()=>{if(P)save();else{try{localStorage.getItem(KEY);storageNotice('')}catch{storageNotice(message)}}};$('hideStorage').onclick=()=>{el.hidden=true}}
+}
+function load(){
+  let raw;try{raw=localStorage.getItem(KEY)}catch{storageOK=false;storageNotice('Хранилище недоступно. Профиль и попытки будут доступны только до закрытия или перезагрузки страницы.');return null}
+  if(!raw)return null;
+  try{const r=JSON.parse(raw),p=normalize(r);if(!p)throw Error('profile');
+    if(r.version!==2||JSON.stringify(p)!==JSON.stringify(r)){legacyRaw=raw;repairNeeded=true}
+    if(r.attempt&&!p.attempt)storageNotice('Сохранённая попытка повреждена и не может быть продолжена. Доступная статистика профиля восстановлена.');
+    return p;
+  }catch{legacyRaw=raw;repairNeeded=true;storageNotice('Не удалось прочитать профиль. Исходная запись оставлена в хранилище; перед новой записью будет создана её резервная копия. Можно продолжить гостем.');return null}
+}
+function save(){
+  if(!P)return false;
+  try{
+    if(legacyRaw!==null){localStorage.setItem(BACKUP_KEY,legacyRaw);legacyRaw=null}
+    localStorage.setItem(KEY,JSON.stringify(P));storageOK=true;repairNeeded=false;storageNotice('');return true;
+  }catch{storageOK=false;storageNotice('Не удалось сохранить изменения. Обучение можно продолжить, но новый прогресс и попытка могут пропасть после перезагрузки. Освободите место или разрешите хранение данных и повторите сохранение.');return false}
+}
+const ACH=[
+{id:'first',icon:'👣',name:'Первый шаг',desc:'Ответить на первое задание',ok:p=>p.total>=1},
+{id:'five',icon:'🌱',name:'Начало пути',desc:'5 правильных ответов',ok:p=>p.correct>=5},
+{id:'expert',icon:'🧠',name:'Знаток безопасности',desc:'20 правильных ответов',ok:p=>p.correct>=20},
+{id:'clean',icon:'💎',name:'Без ошибок',desc:'Пройти основной режим без ошибок',ok:p=>p.clean},
+...[5,10,15,20].map((n,i)=>({id:'s'+n,icon:['🔥','⚡','🚀','👑'][i],name:'Серия из '+n,desc:n+' правильных ответов подряд со статистикой',ok:p=>p.bestStreak>=n})),
+{id:'explorer',icon:'🧭',name:'Исследователь',desc:'Пройти все основные режимы',ok:p=>MODKEYS.every(k=>p.doneModes[k])},
+{id:'all',icon:'🏆',name:'Полный успех',desc:`Ответить на все ${TOTAL} уникальных заданий основных режимов`,ok:p=>IDS.every(i=>p.seen.includes(i))}];
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;$('toasts').append(d);setTimeout(()=>d.remove(),4000)}
+function checkAch(){ACH.forEach(a=>{if(!P.ach[a.id]&&a.ok(P)){P.ach[a.id]=true;toast('🏆 '+a.name)}})}
+const pct=()=>P&&P.total?Math.round(P.correct/P.total*100):0;
+const currentAttempt=()=>track&&P?P.attempt:guestAttempt;
+const activeStreak=()=>track&&P?P.currentStreak:guestStreak;
+function updHeader(k='home'){
+  $('pbtn').innerHTML=`<span class="av">${P?esc(Array.from(P.nick)[0].toUpperCase()):'?'}</span><span class="un"><b>${P?esc(P.nick):'Гость'}</b><small>${track&&P?'Статистика включена':'Гостевой режим'}</small></span>`;
+  document.querySelectorAll('.ni').forEach(b=>{b.classList.toggle('active',b.dataset.k===k);if(b.dataset.k===k)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  const name=MODES[k]?MODES[k].name:({home:'Главная',profile:'Профиль',ach:'Достижения',review:'Работа над ошибками'}[k]||'Обучение');
+  $('crumb').innerHTML=`<b>${name}</b><span>Цифровая защита</span>`;$('sk').textContent='🔥 Серия: '+activeStreak();
+  $('sst').innerHTML=track&&P?`<b>Статистика включена</b><br>${esc(P.nick)}`:'<b>Гостевой режим</b><br>Результаты не сохраняются';
+  document.title=name+' — Цифровая защита';
+}
+function go(path,replace=false){const hash='#/'+path;if(location.hash===hash){render();return}if(replace){history.replaceState(null,'',hash);render()}else location.hash=hash}
+function button(text,path,style='ghost'){return `<button class="${style}" data-go="${path}">${text}</button>`}
+function bind(){app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go))}
+function focusHeading(){const el=app.querySelector('h1,h2')||app;el.setAttribute('tabindex','-1');el.focus({preventScroll:true})}
+function showCard(h){app.innerHTML=`<div class="card">${h}</div>`}
+function score(a){return a.answers.reduce((s,v,j)=>s+(v===ALL[a.ids[j]][6]?1:0),0)}
+function spark(v,id){
+  if(v.length<2)v=[0,0,0,0,0,0];
+  const W=300,H=80,mx=Math.max(1,...v),n=v.length,pt=v.map((y,i)=>[i*W/(n-1),H-6-(y/mx)*(H-20)]);
+  let d="M"+pt[0];for(let i=1;i<n;i++){const a=pt[i-1],b=pt[i],c=(a[0]+b[0])/2;d+=` C${c},${a[1]} ${c},${b[1]} ${b[0]},${b[1]}`}
+  return `<svg class="sp" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4d6bff" stop-opacity=".5"/><stop offset="1" stop-color="#4d6bff" stop-opacity="0"/></linearGradient></defs><path d="${d} L${W},${H} L0,${H} Z" fill="url(#${id})"/><path d="${d}" fill="none" stroke="#5a78ff" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>`;
+}
+function gauge(p){
+  const N=8,R=90,r=60,f=Math.round(p/100*N),C=["#b9f5d8","#8aeac0","#5fdca8","#35cc90","#26b27c","#1f9a6b","#188059","#126a4a"];
+  const P_=(rad,a)=>(100+rad*Math.cos(a)).toFixed(1)+","+(100+rad*Math.sin(a)).toFixed(1);
+  let h="";for(let i=0;i<N;i++){const a0=Math.PI+i*Math.PI/N+.03,a1=Math.PI+(i+1)*Math.PI/N-.03;
+    h+=`<path d="M${P_(R,a0)} A${R},${R} 0 0 1 ${P_(R,a1)} L${P_(r,a1)} A${r},${r} 0 0 0 ${P_(r,a0)}Z" fill="${i<f?C[i]:"#dfe3f2"}" opacity="${i<f?1:.85}"/>`}
+  return `<svg viewBox="0 0 200 108">${h}</svg>`;
+}
+
+function recMode(){return MODKEYS.reduce((a,k)=>{const rate=x=>P&&P.modes[x]?P.modes[x].best/P.modes[x].size:-1;return rate(k)<rate(a)?k:a},MODKEYS[0])}
+function home(){
+  const on=track&&P,a=currentAttempt(),has=!!(on&&P.total);
+  const cards=MODKEYS.map(k=>{const m=MODES[k],r=on&&P.modes[k];return `<button class="mode" data-go="mode/${k}"><span class="mi">${m.icon}</span><b>${m.name}</b><span class="mut">${m.desc}</span>${on?`<div class="mbar"><i style="width:${r?r.best/r.size*100:0}%"></i></div><span class="mut">Лучший: ${r?r.best+' из '+r.size:'—'} · Теория: ${(P.lessons[k]||[]).length} из ${THEORY[k].length}</span>`:''}<em>${m.ids.length} заданий →</em></button>`}).join('');
+  const intro=`<section class="panel intro"><h1>${has?'Продолжайте обучение':'Учитесь распознавать цифровые угрозы'}</h1><p>Короткая теория → практика на примерах → результат с объяснениями. ${TOTAL} заданий в трёх разделах.</p><div class="actions">${a&&!a.done?button('Продолжить: '+MODES[a.mode].name,`test/${a.mode}/${a.cur}`,'btn'):button(has?'Продолжить обучение':'Начать обучение','mode/'+recMode(),'btn')}${a&&a.done?button('Последний результат',`result/${a.mode}`):''}${P?button('Работа над ошибками','review'):''}</div><p class="mut">${on?'Статистика включена: '+esc(P.nick):'Гостевой режим: попытка доступна до перезагрузки страницы. Результаты не сохраняются.'}</p></section>`;
+  const h=has?P.hist.slice(-20):[],cum=[];let c=0,st=0;h.forEach(x=>cum.push(c+=x));
+  const metric=(ic,v,l,ser,id)=>`<div class="sc"><div class="scr"><span class="si">${ic}</span><div><b>${v}</b><span>${l}</span></div></div>${spark(ser,id)}</div>`;
+  const keys=Object.keys(TOPICS),mx=Math.max(1,...keys.map(k=>has?Math.max(...(P.topics[k]||[0,0])):0));
+  const bars=keys.map(k=>{const t=on&&P.topics[k]||[0,0];return `<div class="bg"><div class="pair"><i class="b1" style="height:${t[0]/mx*100}%" title="Верно: ${t[0]}"></i><i class="b2" style="height:${t[1]/mx*100}%" title="Ошибки: ${t[1]}"></i></div><span>${SHORT[k]}</span></div>`});
+  app.innerHTML=intro+`<div class="${has?'dash':''}">${has?`<div class="col">${metric('✅',P.correct,'правильных ответов',cum,'s1')}${metric('🎯',pct()+'%','точность ответов',h.map((x,i)=>cum[i]/(i+1)*100),'s2')}${metric('🔥',P.currentStreak+' / '+P.bestStreak,'серия / рекорд',h.map(x=>st=x?st+1:0),'s3')}<div class="panel gc"><h2>Точность ответов</h2>${gauge(pct())}<div class="gl"><b>${pct()}%</b></div><p class="mut">${P.total} ответов за всё время. Уникальных заданий: ${P.seen.length} из ${TOTAL}. Это результат тренировки, а не оценка реальной защищённости.</p><p class="mut">Мини-графики: последние ${h.length} ответов в порядке прохождения; первый показывает накопление верных ответов внутри этой выборки.</p></div></div>`:''}<div class="col2"><section class="panel"><div class="row"><h2>Разделы обучения</h2><div class="tog"><button class="ghost${on?'':' on'}" id="guest">Без статистики</button><button class="ghost${on?' on':''}" id="tracked">Со статистикой</button></div></div><div class="modes">${cards}</div></section>${has?`<section class="panel"><h2>Результаты по темам</h2><p class="mut">Все ответы основных режимов за всё время. Повторения входят в счётчики; работа над ошибками исключена.</p><div class="legend"><span>🔵 Верно</span><span>🟠 Ошибки</span></div><div class="chart" aria-hidden="true"><div class="yax"><span>${mx}</span><span>${Math.round(mx/2)}</span><span>0</span></div><div class="bars">${bars.join('')}</div></div><details><summary>Результаты текстом</summary><ul>${keys.map(k=>`<li>${TOPICS[k]}: верно ${(P.topics[k]||[0,0])[0]}, ошибок ${(P.topics[k]||[0,0])[1]}</li>`).join('')}</ul></details></section>`:''}<section class="panel"><div class="row"><h2>🏆 Достижения</h2>${button('Открыть все','ach')}</div><div class="chips">${ACH.map(a=>`<span class="chip2${on&&P.ach[a.id]?' got':''}" title="${a.name}">${a.icon}<span class="sr">${a.name}: ${on&&P.ach[a.id]?'получено':'не получено'}</span></span>`).join('')}</div></section></div></div>`;
+  $('guest').onclick=()=>{track=false;render()};$('tracked').onclick=()=>{if(P){track=true;render()}else go('nick')};
+}
+function nickScreen(){
+  showCard(`<h2>${P?'Изменить никнейм':'Создать профиль'}</h2><p>Почта и пароль не нужны: профиль создаётся только в этом браузере.</p><form id="nickForm"><label for="nk">Никнейм, от 2 до 16 символов</label><input id="nk" class="inp" minlength="2" maxlength="16" required autocomplete="nickname" aria-describedby="nickError"><p id="nickError" role="alert"></p><p class="mut">${WARN}</p><div class="actions">${button('Отмена',P?'profile':'home')}<button class="btn" type="submit">Сохранить</button></div></form>`);
+  $('nk').value=P?P.nick:'';$('nickForm').onsubmit=e=>{e.preventDefault();const n=$('nk').value.trim().replace(/\s+/g,' ');if(n.length<2){$('nickError').textContent='Введите минимум 2 символа.';$('nk').focus();return}if(P)P.nick=n;else P=newP(n);track=true;save();go('profile')};
+}
+function profileView(){
+  if(!P){showCard(`<h2>Профиль</h2><p>Создайте локальный профиль, чтобы сохранять попытки, статистику и достижения.</p>${button('Создать профиль','nick','btn')}`);return}
+  showCard(`${button('← В меню','home')}<h2>👤 ${esc(P.nick)}</h2>${button('Изменить никнейм','nick')}<div class="sg"><div><b>${P.total}</b>ответов</div><div><b>${P.correct}</b>верных</div><div><b>${P.wrong}</b>ошибок</div><div><b>${pct()}%</b>точность</div><div><b>${P.seen.length} / ${TOTAL}</b>уникальных заданий</div><div><b>${P.currentStreak} / ${P.bestStreak}</b>серия / рекорд</div></div><p class="mut">Статистика основных режимов за всё время. Работа над ошибками в неё не входит.</p><h3>Результаты и теория</h3>${MODKEYS.map(k=>{const m=P.modes[k];return `<div class="rec"><b>${MODES[k].name}</b><p class="mut">${m?`Пройдено раз: ${m.runs} · Лучший: ${m.best} из ${m.size} · Последний: ${m.last} из ${m.size}`:'Ещё не пройден'}<br>Просмотрено уроков: ${(P.lessons[k]||[]).length} из ${THEORY[k].length}${P.theoryDone[k]?' · Все уроки просмотрены':''} · Ответов после теории: ${P.after[k]||0}</p></div>`}).join('')}<div class="actions">${button('Работа над ошибками','review')}${button('🏆 Достижения','ach')}</div><p class="mut">${WARN}</p><div id="resetBox"><button class="ghost" id="reset">Сбросить прогресс</button></div>`);
+  $('reset').onclick=()=>{$('resetBox').innerHTML='<p>Сбросить статистику, сохранённую попытку, серии, теорию и достижения? Никнейм сохранится.</p><div class="actions"><button class="ghost" id="cancelReset">Отмена</button><button class="btn" id="confirmReset">Да, сбросить</button></div>';$('cancelReset').onclick=()=>render();$('confirmReset').onclick=()=>{P=newP(P.nick);guestAttempt=null;reviewAttempt=null;guestStreak=0;save();render()};$('confirmReset').focus()};
+}
+function achView(){showCard(`${button('← В меню','home')}<h2>🏆 Достижения</h2>${!P?'<p>Создайте профиль и играйте со статистикой, чтобы получать достижения.</p>':''}<div class="achs">${ACH.map(a=>{const got=P&&P.ach[a.id];return `<div class="ach${got?' got':''}"><span class="mi">${a.icon}</span><b>${a.name}</b><span>${a.desc}</span><em>${got?'Получено':'Не получено'}</em></div>`}).join('')}</div>${P&&P.ach.legacy30?'<p class="rec">🏅 Сохранено прежнее достижение за прохождение 30 заданий. Для нового «Полного успеха» ответьте на все '+TOTAL+' заданий.</p>':''}`)}
+function modeView(k){const m=MODES[k],a=currentAttempt();showCard(`${button('← В меню','home')}<div class="shield">${m.icon}</div><h1>${m.name}</h1><p>${m.desc}</p>${a&&!a.done?`<div class="rec"><p>Есть незавершённая попытка: ${MODES[a.mode].name}, отвечено ${a.answers.filter(x=>x!==null).length} из ${a.ids.length}.</p>${button('Продолжить',`test/${a.mode}/${a.cur}`,'btn')}</div>`:''}<div class="modes">${button('📖 Изучить теорию',`theory/${k}`,'mode')}${button(a&&a.mode===k&&!a.done?'Начать заново':'🎯 Перейти к тесту',`start/${k}`,'mode')}</div><p class="mut">${track&&P?'Ответы учитываются сразу. Новая попытка не отменяет ранее учтённые ответы.':'Гостевая попытка хранится в памяти до перезагрузки и не влияет на профиль.'}</p>`)}
+function newAttempt(k,ids=MODES[k].ids,review=false){return{token:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),mode:k,ids:ids.slice(),answers:ids.map(()=>null),order:ids.map(i=>ALL[i][5].length===2?[0,1]:shuffle(ALL[i][5].map((_,j)=>j))),cur:0,done:false,review}}
+function launch(k){const a=currentAttempt();
+  if(a&&!a.done){showCard(`<h2>Начать новую попытку?</h2><p>Незавершённая попытка «${MODES[a.mode].name}» будет заменена. Уже учтённые ответы останутся в статистике.</p><div class="actions">${button('Продолжить прежнюю',`test/${a.mode}/${a.cur}`)}${button('Вернуться к разделу',`mode/${k}`)}<button class="btn" id="newAttempt">Начать заново</button></div>`);$('newAttempt').onclick=()=>begin(k);return}
+  // Маршрут открытия теста не имеет побочного эффекта при Назад/Вперёд.
+  showCard(`<h2>Начать тест: ${MODES[k].name}</h2><p>${MODES[k].ids.length} заданий. ${track&&P?'Ответы учитываются сразу, попытка сохраняется в профиле.':'Гостевая попытка доступна только до перезагрузки.'}</p><div class="actions">${button('← К разделу',`mode/${k}`)}<button class="btn" id="newAttempt">Начать тест</button></div>`);$('newAttempt').onclick=()=>begin(k);
+}
+function begin(k){const a=newAttempt(k);if(track&&P){P.attempt=a;save()}else guestAttempt=a;go(`test/${k}/0`,true)}
+function routeAttempt(parts){return parts[0]==='review-test'||parts[0]==='review-result'?reviewAttempt:currentAttempt()}
+function taskView(a,index){
+  const first=a.answers.indexOf(null),limit=first<0?a.ids.length-1:first;
+  a.cur=Math.min(num(index),limit);const j=a.cur,t=ALL[a.ids[j]],ans=a.answers[j],done=ans!==null,right=t[6];
+  if(!a.review&&track&&P)save();
+  showCard(`<div class="actions">${button('← В меню','home')}${!a.review?button('📖 Теория',`theory/${a.mode}`):button('К ошибкам','review')}</div><h2>${a.review?'Работа над ошибками':MODES[a.mode].name}</h2><div class="top"><span>Задание ${j+1} из ${a.ids.length} · Верно: ${score(a)}</span><span>${a.review?'Без изменения статистики':'🔥 Серия: '+activeStreak()+' · Статистика: '+(track&&P?'вкл':'выкл')}</span></div><div class="bar" role="progressbar" aria-label="Отвечено заданий" aria-valuemin="0" aria-valuemax="${a.ids.length}" aria-valuenow="${a.answers.filter(x=>x!==null).length}"><i style="width:${a.answers.filter(x=>x!==null).length/a.ids.length*100}%"></i></div><div class="topic">${TOPICS[t[0]]}</div><h3 id="question">${esc(t[4])}</h3><div class="msg"><b>${esc(t[1])}${t[2]?' · '+esc(t[2]):''}</b>${esc(t[3])}</div>${a.order[j].map(i=>`<button class="opt${done?(i===right?' ok':i===ans?' bad':''):''}" data-answer="${i}" aria-disabled="${done}"${done?' aria-describedby="feedback"':''}>${esc(t[5][i])}${done&&i===right?' — правильный ответ':done&&i===ans?' — ваш ответ, неверно':''}</button>`).join('')}${done?`<div id="feedback" class="fb ${ans===right?'ok':'bad'}" tabindex="-1"><h3>${ans===right?'✅ Верно!':'❌ Неверно'}</h3>${esc(t[7])}</div>`:''}<div class="nav">${j>0?button('← Предыдущее',`${a.review?'review-test':'test'}/${a.mode}/${j-1}`):'<button class="ghost" disabled>← Предыдущее</button>'}${done?button(j===a.ids.length-1?'Показать результат':'Следующее задание',j===a.ids.length-1?`${a.review?'review-result':'result'}/${a.mode}`:`${a.review?'review-test':'test'}/${a.mode}/${j+1}`,'btn'):''}</div>`);
+  app.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>answer(a,+b.dataset.answer));
+}
+function answer(a,i){
+  const j=a.cur;if(a.answers[j]!==null||!a.order[j].includes(i))return;
+  const id=a.ids[j],t=ALL[id],ok=i===t[6];a.answers[j]=i;
+  if(!a.review){
+    if(track&&P){P.currentStreak=ok?P.currentStreak+1:0;P.bestStreak=Math.max(P.bestStreak,P.currentStreak);P.total++;P[ok?'correct':'wrong']++;P.hist.push(ok?1:0);P.hist=P.hist.slice(-40);const tp=P.topics[t[0]]||(P.topics[t[0]]=[0,0]);tp[ok?0:1]++;if(!ok)P.miss[id]=(P.miss[id]||0)+1;if(!P.seen.includes(id))P.seen.push(id);if(P.theoryDone[a.mode])P.after[a.mode]=(P.after[a.mode]||0)+1;checkAch();save()}
+    else guestStreak=ok?guestStreak+1:0;
+  }
+  render(false);const b=app.querySelector(`[data-answer="${i}"]`);if(b)b.focus({preventScroll:true});$('announce').textContent=(ok?'Верно. ':'Неверно. ')+t[7];
+}
+function resultView(a){
+  if(a.answers.some(x=>x===null)){showCard(`<h2>Тест ещё не завершён</h2>${button('Продолжить',`${a.review?'review-test':'test'}/${a.mode}/${a.answers.indexOf(null)}`,'btn')}`);return}
+  const s=score(a),n=a.ids.length;
+  if(!a.done){a.done=true;if(!a.review&&track&&P){const m=P.modes[a.mode]||(P.modes[a.mode]={runs:0,best:0,last:0,size:n});m.runs++;m.last=s;m.best=Math.max(m.best,s);m.size=n;P.doneModes[a.mode]=true;if(s===n)P.clean=true;checkAch()}}
+  const saved=!a.review&&track&&P?save():false;
+  showCard(`<div class="shield">🏁</div><h1>${a.review?'Работа над ошибками завершена':MODES[a.mode].name}</h1><p class="score">${s} / ${n}</p><p>правильных ответов</p><p class="mut">${a.review?'Повторение не меняет общую точность, серии, достижения, результаты режимов и список прошлых ошибок.':track&&P?(saved?'Результат сохранён в профиле.':'Результат учтён в памяти, но сохранить его не удалось. Не перезагружайте страницу до успешного сохранения.'):'Вы играли без статистики. Результат доступен до перезагрузки и не сохранён в профиле.'}</p><div class="actions">${button('В меню','home')}${a.review?button('К списку ошибок','review'):button('📖 Теория',`theory/${a.mode}`)}${!a.review&&!(track&&P)?button(P?'Включить статистику':'Создать профиль',P?'enable':'nick'):''}${a.review?'<button class="btn" id="reviewAgain">Повторить ошибки</button>':button('Повторить',`start/${a.mode}`,'btn')}</div>`);
+  if(a.review)$('reviewAgain').onclick=startReview;
+}
+function reviewView(){
+  if(!P){showCard(`<h2>Работа над ошибками</h2><p>Для сохранения ошибок нужен профиль и игра со статистикой.</p>${button('Создать профиль','nick','btn')}`);return}
+  const ids=IDS.filter(i=>P.miss[i]>0).sort((a,b)=>P.miss[b]-P.miss[a]);
+  showCard(`${button('← В профиль','profile')}<h2>Работа над ошибками</h2><p>Здесь все задания, в которых вы когда-либо ошибались в основных режимах. Повторение не меняет точность, серии, достижения и результаты режимов. История ошибок сохраняется.</p><p class="mut">Попытка повторения доступна до перезагрузки. Основная попытка сохраняется отдельно.</p>${ids.length?`<div class="actions"><button class="btn" id="reviewStart">Начать повторение (${ids.length})</button>${reviewAttempt&&!reviewAttempt.done?button('Продолжить повторение',`review-test/${reviewAttempt.mode}/${reviewAttempt.cur}`):''}</div><ul>${ids.map(i=>`<li>${esc(ALL[i][4])} <span class="mut">— ошибок: ${P.miss[i]}</span></li>`).join('')}</ul>`:'<p>Сохранённых ошибок пока нет.</p>'}`);if(ids.length)$('reviewStart').onclick=startReview;
+}
+function startReview(){if(!P)return;const ids=IDS.filter(i=>P.miss[i]>0);if(!ids.length)return;reviewAttempt=newAttempt('catch',ids,true);go('review-test/catch/0')}
+function theoryList(k){showCard(`${button('← К разделу',`mode/${k}`)}<h2>📖 Теория: ${MODES[k].name}</h2><p>Выберите урок. Отметка «Просмотрен» означает открытие страницы, а не проверку знаний.</p><div class="achs">${THEORY[k].map((l,i)=>`<button class="mode" data-go="lesson/${k}/${i}"><span class="mi">${l.i}</span><b>${i+1}. ${l.t}</b><span>${l.p}</span><em>${track&&P&&(P.lessons[k]||[]).includes(i)?'✓ Просмотрен':'Открыть'}</em></button>`).join('')}</div><div class="actions">${button('Перейти к тесту',`start/${k}`,'btn')}${currentAttempt()&&!currentAttempt().done?button('Продолжить попытку',`test/${currentAttempt().mode}/${currentAttempt().cur}`):''}</div>${sources()}`)}
+function lessonView(k,i){const L=THEORY[k],l=L[i];if(track&&P){const a=P.lessons[k]||(P.lessons[k]=[]);if(!a.includes(i)){a.push(i);if(a.length===L.length)P.theoryDone[k]=true;save()}}
+  showCard(`${button('← Список уроков',`theory/${k}`)}<div class="top"><span>${MODES[k].name}</span><span>Урок ${i+1} из ${L.length}</span></div><h2>${l.i} ${l.t}</h2><p>${l.p}</p><div class="rec"><h3>Правила</h3><ul>${l.l.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="msg"><b>Учебный пример</b>${esc(l.x[0])}</div><div class="rec"><b>Как действовать:</b> ${esc(l.x[1])}</div><div class="fb ok"><h3>Главное</h3><ul>${l.k.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="nav">${i>0?button('← Предыдущий урок',`lesson/${k}/${i-1}`):''}${i<L.length-1?button('Следующий урок →',`lesson/${k}/${i+1}`,'btn'):button('Перейти к тесту',`start/${k}`,'btn')}</div>${currentAttempt()&&!currentAttempt().done?`<div class="actions">${button('Продолжить попытку',`test/${currentAttempt().mode}/${currentAttempt().cur}`)}</div>`:''}`)}
+function sources(){return `<details class="sources"><summary>Источники и границы учебных примеров</summary><p>Материалы уточнены 1 ноября 2026 года. Все адреса .test и .example в заданиях вымышлены и не являются ссылками. Отсутствие явных признаков обмана не доказывает подлинность сообщения.</p><ul><li><a href="https://www.fbi.gov/how-we-can-help-you/common-frauds-and-scams/spoofing-and-phishing" target="_blank" rel="noopener noreferrer">FBI: подмена отправителя и фишинг</a></li><li><a href="https://consumer.ftc.gov/articles/are-public-wi-fi-networks-safe-what-you-need-know" target="_blank" rel="noopener noreferrer">FTC: публичный Wi-Fi, шифрование и поддельные сайты</a></li><li><a href="https://support.microsoft.com/en-us/accounts-billing/manage/troubleshoot-microsoft-verification-code-issues" target="_blank" rel="noopener noreferrer">Microsoft: неожиданные коды подтверждения</a></li></ul><p>Ссылки на источники требуют интернета; само обучение работает без него.</p></details>`}
+function missingAttempt(){showCard(`<h2>Попытка недоступна</h2><p>В этом режиме хранения нет подходящей попытки. Она могла быть завершена, заменена или удалена. Гостевые попытки исчезают после перезагрузки.</p>${button('В меню','home','btn')}`)}
+function render(focus=true){
+  const parts=location.hash.replace(/^#\/?/,'').split('/'),page=parts[0]||'home',k=parts[1];
+  updHeader(MODES[k]?k:['profile','ach','review'].includes(page)?page:'home');
+  if(page==='home')home();else if(page==='profile')profileView();else if(page==='nick')nickScreen();else if(page==='ach')achView();else if(page==='review')reviewView();
+  else if(page==='enable'){showCard(`<h2>Включить статистику</h2><p>Гостевые ответы не переносятся в профиль.</p><button class="btn" id="enableStats">${P?'Включить статистику':'Создать профиль'}</button>`);$('enableStats').onclick=()=>{if(P){track=true;go('home')}else go('nick')}}
+  else if(['mode','theory','lesson','start'].includes(page)&&MODES[k]){
+    if(page==='mode')modeView(k);else if(page==='theory')theoryList(k);else if(page==='start')launch(k);else{const i=Number(parts[2]);if(Number.isInteger(i)&&i>=0&&i<THEORY[k].length)lessonView(k,i);else theoryList(k)}
+  }else if(['test','result','review-test','review-result'].includes(page)){
+    const a=routeAttempt(parts);if(!a||a.mode!==k)missingAttempt();else if(page.endsWith('result'))resultView(a);else taskView(a,Number(parts[2]));
+  }else{showCard(`<h2>Страница не найдена</h2>${button('На главную','home','btn')}`)}
+  bind();if(focus){focusHeading();window.scrollTo({top:0,behavior:'instant'})}
+}
+$('nav').onclick=e=>{const b=e.target.closest('.ni');if(b)go(MODES[b.dataset.k]?'mode/'+b.dataset.k:b.dataset.k)};
+$('pbtn').onclick=()=>go('profile');$('bell').onclick=()=>go('ach');
+$('hb').onclick=()=>{const mini=$('shell').classList.toggle('mini');$('hb').setAttribute('aria-expanded',String(!mini));$('hb').setAttribute('aria-label',mini?'Развернуть меню':'Свернуть меню')};$('hb').setAttribute('aria-expanded','true');
+$('q').onkeydown=e=>{if(e.key!=='Enter')return;const v=$('q').value.trim().toLowerCase();if(!v)return;const rows=[['home','главная панель'],...MODKEYS.map(k=>['mode/'+k,MODES[k].name.toLowerCase()]),['profile','профиль статистика'],['ach','достижения награды'],['review','ошибки повторение']];const r=rows.find(x=>x[1].includes(v));if(r){go(r[0]);$('q').value=''}else toast('Раздел не найден')};
+window.addEventListener('hashchange',()=>render());
+P=load();track=!!P;if(P&&repairNeeded){const message=storageIssue;if(save()&&message)storageNotice(message)}render();
+
+</script>
+</body>
+</html>
